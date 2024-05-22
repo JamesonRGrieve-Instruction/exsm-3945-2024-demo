@@ -16,10 +16,31 @@ public class APIController : ControllerBase
         return "Hello, World! - GET";
     }
 
-    [HttpPost("sample")]
-    public ActionResult<string> PostSample(string message, int responseCode = 200)
+
+    [HttpPost("sample/{routeParam}")] // Route parameters are defined in the route itself
+    [SwaggerOperation(
+        Summary = "Sample POST request",
+        Description = "This is a sample POST request.",
+        OperationId = "PostSample",
+        Tags = new[] { "API", "Sample" }
+    )]
+    [SwaggerResponse(200, "Success", typeof(string))]
+    [SwaggerResponse(400, "Bad Request", typeof(string))]
+    [SwaggerResponse(401, "Unauthorized", typeof(string))]
+    [SwaggerResponse(403, "Forbidden", typeof(string))]
+    [SwaggerResponse(404, "Not Found", typeof(string))]
+    [SwaggerResponse(500, "Internal Server Error", typeof(string))]
+    [SwaggerResponse(418, "I'm a Teapot", typeof(string))]
+    public ActionResult<string> PostSample(
+        [FromBody] /* FromBody represents the ENTIRE body, not just one parameter therein */ string body,
+        [FromQuery] int responseCode = 200,
+        [FromRoute] string routeParam = "World",
+        [FromHeader] string Authorization = null
+    //[FromForm] string[] formParams = null,
+    //[FromServices] IServiceProvider serviceProvider = null
+    )
     {
-        return StatusCode(responseCode, "Hello, World! - POST. Message: " + message);
+        return StatusCode(responseCode, "Hello, " + routeParam + "! - POST. Authorization: " + Authorization + " Message: " + body);
     }
 
     [HttpPut("sample")]
