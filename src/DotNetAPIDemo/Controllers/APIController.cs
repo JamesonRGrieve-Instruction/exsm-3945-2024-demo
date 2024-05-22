@@ -24,6 +24,7 @@ public class APIController : ControllerBase
         OperationId = "PostSample",
         Tags = new[] { "API", "Sample" }
     )]
+
     [SwaggerResponse(200, "Success", typeof(string))]
     [SwaggerResponse(400, "Bad Request", typeof(string))]
     [SwaggerResponse(401, "Unauthorized", typeof(string))]
@@ -32,10 +33,10 @@ public class APIController : ControllerBase
     [SwaggerResponse(500, "Internal Server Error", typeof(string))]
     [SwaggerResponse(418, "I'm a Teapot", typeof(string))]
     public ActionResult<string> PostSample(
-        [FromBody] /* FromBody represents the ENTIRE body, not just one parameter therein */ string body,
-        [FromQuery] int responseCode = 200,
-        [FromRoute] string routeParam = "World",
-        [FromHeader] string Authorization = null
+        [FromBody][SwaggerParameter("Message to Send Back", Required = false)]/* FromBody represents the ENTIRE body, not just one parameter therein */ string body,
+        [FromQuery][SwaggerParameter("Status Code to Send Back", Required = false)] int responseCode = 200,
+        [FromRoute][SwaggerParameter("To Whom to Say Hello", Required = false)] string routeParam = "World",
+        [FromHeader][SwaggerParameter("Authorization Header", Required = false)] string Authorization = null
     //[FromForm] string[] formParams = null,
     //[FromServices] IServiceProvider serviceProvider = null
     )
