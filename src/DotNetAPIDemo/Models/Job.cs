@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace DotNetAPIDemo.Models;
@@ -16,5 +17,6 @@ public class Job
 
     [InverseProperty(nameof(Person.Job))]
     [ValidateNever]
+    [JsonIgnore]
     public virtual ICollection<Person> People { get; set; }
 }

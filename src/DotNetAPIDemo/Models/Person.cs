@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Configuration;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
@@ -53,6 +54,7 @@ public class Person
     [ForeignKey(nameof(JobID))]
     [InverseProperty(nameof(Models.Job.People))]
     [ValidateNever]
+    [JsonIgnore]
     public virtual Job Job { get; set; }
 
     [Column("user_id")]
@@ -60,5 +62,6 @@ public class Person
 
     [ForeignKey(nameof(UserID))]
     [ValidateNever]
+    [JsonIgnore]
     public virtual IdentityUser User { get; set; }
 }
