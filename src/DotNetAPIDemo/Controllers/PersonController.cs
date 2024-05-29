@@ -68,6 +68,30 @@ public class PersonController : ControllerBase
         }
         return BadRequest(ModelState);
     }
+    [HttpGet("person")]
+    [SwaggerOperation(
+            Summary = "Get all People",
+            Description = "Get all people from the database.",
+            OperationId = "GetPeople",
+            Tags = new[] { "API", "Person" }
+        )]
+    [SwaggerResponse(200, "Success", typeof(Person))]
+    [SwaggerResponse(404, "Not Found", typeof(string))]
+
+    public async Task<IActionResult> GetPerson()
+    {
+        List<Person> people = await _context.People.OrderBy(person => person.FirstName + person.LastName).ToListAsync();
+        if (people.Count == 0)
+        {
+            return NotFound();
+        }
+        else
+        {
+            return Ok(people);
+        }
+    }
+
+
     [HttpGet("person/{id}")]
     [SwaggerOperation(
         Summary = "Get a Person",
