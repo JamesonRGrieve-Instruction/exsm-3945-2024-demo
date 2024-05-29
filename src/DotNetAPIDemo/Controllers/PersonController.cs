@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using DotNetAPIDemo.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 [Route("api")]
 [ApiController]
 public class PersonController : ControllerBase
@@ -11,6 +12,16 @@ public class PersonController : ControllerBase
     public PersonController(ApplicationDbContext context)
     {
         _context = context;
+    }
+
+    public record PersonCreate
+    {
+        public string FirstName { get; init; }
+        public string LastName { get; init; }
+        public string PhoneNumber { get; init; }
+        public int JobID { get; init; }
+        public string JobName { get; init; }
+        public string PubliclyVisible { get; init; } = "off";
     }
 
     [HttpPost("person")]
@@ -23,34 +34,37 @@ public class PersonController : ControllerBase
     [SwaggerResponse(201, "Success", typeof(Person))]
     [SwaggerResponse(400, "Bad Request", typeof(string))]
     public async Task<IActionResult> PostPerson(
-        [FromBody][SwaggerParameter("Person to Create", Required = true)] Person person
+        [FromBodyAttribute][SwaggerParameter("Person to Create", Required = true)] PersonCreate personCreate
     )
     {
+        Person newPerson = new Person()
+        {
+            FirstName = personCreate.FirstName,
+            LastName = personCreate.LastName,
+            PhoneNumber = personCreate.PhoneNumber,
+            JobID = personCreate.JobID
+        };
         if (ModelState.IsValid)
         {
-            /*
-            if (person.JobID == 0)
+            if (personCreate.JobID == 0)
             {
-                Job newJob = new Job() { Name = JobName };
+                Job newJob = new Job() { Name = personCreate.JobName };
                 _context.Jobs.Add(newJob);
                 _context.SaveChanges();
-                person.JobID = newJob.ID;
+                newPerson.JobID = newJob.ID;
             }
-            */
-            /*
-            if (PubliclyVisible == "on")
+            if (personCreate.PubliclyVisible == "on")
             {
-                person.UserID = null;
+                newPerson.UserID = null;
             }
-            */
-            _context.Add(person);
+            _context.Add(newPerson);
             await _context.SaveChangesAsync();
             //return RedirectToAction(nameof(Index));
 
             // Get the person from the GET action.
             //return CreatedAtAction("GetPerson", new { id = person.ID }, person);
 
-            return Created("api/person/" + person.ID, person);
+            return Created("api/person/" + newPerson.ID, newPerson);
         }
         return BadRequest(ModelState);
     }
