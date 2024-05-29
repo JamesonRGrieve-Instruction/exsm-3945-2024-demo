@@ -78,9 +78,26 @@ public class PersonController : ControllerBase
     [SwaggerResponse(200, "Success", typeof(Person))]
     [SwaggerResponse(404, "Not Found", typeof(string))]
 
-    public async Task<IActionResult> GetPerson()
+    public async Task<IActionResult> GetPerson([FromQuery] int? pageNum, [FromQuery] int? pageSize, [FromQuery] string? orderBy)
     {
-        List<Person> people = await _context.People.OrderBy(person => person.FirstName + person.LastName).ToListAsync();
+
+        List<Person> people = await _context.People.Include(person => person.Job).ToListAsync();
+        if (orderBy == "LastName")
+        {
+            people = people.OrderBy(p => p.LastName).ToList();
+        }
+        else if (orderBy == "Job")
+        {
+            people = people.OrderBy(p => p.Job.Name).ToList();
+        }
+        else
+        {
+            people = people.OrderBy(p => p.FirstName).ToList();
+        }
+        if (pageNum != null && pageSize != null)
+        {
+            people = people.Take(new Range((int)pageNum * (int)pageSize, ((int)pageNum + 1) * (int)pageSize)).ToList();
+        }
         if (people.Count == 0)
         {
             return NotFound();
