@@ -3,6 +3,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using DotNetAPIDemo.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.Text.RegularExpressions;
 [Route("api")]
 [ApiController]
 public class PersonController : ControllerBase
@@ -78,10 +79,14 @@ public class PersonController : ControllerBase
     [SwaggerResponse(200, "Success", typeof(Person))]
     [SwaggerResponse(404, "Not Found", typeof(string))]
 
-    public async Task<IActionResult> GetPerson([FromQuery] int? pageNum, [FromQuery] int? pageSize, [FromQuery] string? orderBy)
+    public async Task<IActionResult> GetPerson([FromQuery] int? pageNum, [FromQuery] int? pageSize, [FromQuery] string? orderBy, [FromQuery] string? firstNameFilter)
     {
 
         List<Person> people = await _context.People.Include(person => person.Job).ToListAsync();
+        if (firstNameFilter != null)
+        {
+            people = people.Where(p => Regex.IsMatch(p.FirstName, firstNameFilter)).ToList();
+        }
         if (orderBy == "LastName")
         {
             people = people.OrderBy(p => p.LastName).ToList();
