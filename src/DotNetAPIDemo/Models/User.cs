@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace DotNetAPIDemo.Models
 {
-    [Table("post")]
+    [Table("app_user")]
     public class User
     {
         [Key]
