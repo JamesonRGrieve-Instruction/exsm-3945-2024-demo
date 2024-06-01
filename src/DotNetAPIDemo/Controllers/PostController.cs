@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using DotNetAPIDemo.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.AspNetCore.JsonPatch;
+using System.Text.RegularExpressions;
 
 namespace DotNetAPIDemo.Controllers
 {
@@ -21,9 +22,43 @@ namespace DotNetAPIDemo.Controllers
         [HttpGet]
         [SwaggerOperation(Summary = "Get all posts")]
         [SwaggerResponse(StatusCodes.Status200OK, "Returns all posts", typeof(IEnumerable<Post>))]
-        public async Task<ActionResult<IEnumerable<Post>>> GetPosts()
+        public async Task<ActionResult<IEnumerable<Post>>> GetPosts(
+            [FromQuery] int? pageNum,
+            [FromQuery] int? pageSize,
+            [FromQuery] string? sortBy,
+            [FromQuery] string? searchTitle,
+            [FromQuery] string? searchContent
+        )
         {
-            return await _context.Posts.ToListAsync();
+            IEnumerable<Post> posts = await _context.Posts.ToListAsync();
+            if (!string.IsNullOrEmpty(searchTitle))
+            {
+                posts = posts.Where(p => Regex.IsMatch(p.Title, searchTitle, RegexOptions.IgnoreCase));
+            }
+            if (!string.IsNullOrEmpty(searchContent))
+            {
+                posts = posts.Where(p => Regex.IsMatch(p.Content, searchContent, RegexOptions.IgnoreCase));
+            }
+            if (pageNum != null && pageSize != null)
+            {
+                posts = posts.Skip(((int)pageNum - 1) * (int)pageSize).Take((int)pageSize);
+            }
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                if (sortBy.Trim().ToLower() == "title")
+                {
+                    posts = posts.OrderBy(p => p.Title);
+                }
+                else if (sortBy.Trim().ToLower() == "content")
+                {
+                    posts = posts.OrderBy(p => p.Content);
+                }
+                else
+                {
+                    return BadRequest("Invalid sortBy parameter");
+                }
+            }
+            return posts.ToList();
         }
 
         // GET: api/Post/5
