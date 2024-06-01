@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DotNetAPIDemo.Models;
+using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace DotNetAPIDemo.Controllers
 {
@@ -22,6 +19,8 @@ namespace DotNetAPIDemo.Controllers
 
         // GET: api/Post
         [HttpGet]
+        [SwaggerOperation(Summary = "Get all posts")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Returns all posts", typeof(IEnumerable<Post>))]
         public async Task<ActionResult<IEnumerable<Post>>> GetPosts()
         {
             return await _context.Posts.ToListAsync();
@@ -29,9 +28,13 @@ namespace DotNetAPIDemo.Controllers
 
         // GET: api/Post/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Post>> GetPost(int id)
+        [SwaggerOperation(Summary = "Get a specific post")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Returns the post", typeof(Post))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "If the post does not exist")]
+
+        public async Task<ActionResult<Post>> GetPost([SwaggerParameter("The id of the post", Required = true)] int id)
         {
-            var post = await _context.Posts.FindAsync(id);
+            Post post = await _context.Posts.FindAsync(id);
 
             if (post == null)
             {
@@ -42,15 +45,34 @@ namespace DotNetAPIDemo.Controllers
         }
 
         // PUT: api/Post/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPost(int id, Post post)
+        [SwaggerOperation(Summary = "Update a specific post")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Returns the updated post", typeof(Post))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "If the id does not match the post's id")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "If the post does not exist")]
+
+        public async Task<IActionResult> PutPost([SwaggerParameter("The id of the post", Required = true)] int id, [FromBody] JsonPatchDocument<Post> patchDoc)
         {
-            if (id != post.Id)
+            if (patchDoc == null)
             {
                 return BadRequest();
             }
 
+            Post post = await _context.Posts.FindAsync(id);
+
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            patchDoc.ApplyTo(post, ModelState);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _context.Entry(post).CurrentValues.SetValues(post);
             _context.Entry(post).State = EntityState.Modified;
 
             try
@@ -69,12 +91,13 @@ namespace DotNetAPIDemo.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok(post);
         }
 
         // POST: api/Post
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [SwaggerOperation(Summary = "Create a new post")]
+        [SwaggerResponse(StatusCodes.Status201Created, "Returns the created post", typeof(Post))]
         public async Task<ActionResult<Post>> PostPost(Post post)
         {
             _context.Posts.Add(post);
@@ -85,9 +108,13 @@ namespace DotNetAPIDemo.Controllers
 
         // DELETE: api/Post/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeletePost(int id)
+        [SwaggerOperation(Summary = "Delete a specific post")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Returns the deleted post", typeof(Post))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "If the post does not exist")]
+
+        public async Task<IActionResult> DeletePost([SwaggerParameter("The id of the post", Required = true)] int id)
         {
-            var post = await _context.Posts.FindAsync(id);
+            Post post = await _context.Posts.FindAsync(id);
             if (post == null)
             {
                 return NotFound();
@@ -96,7 +123,7 @@ namespace DotNetAPIDemo.Controllers
             _context.Posts.Remove(post);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(post);
         }
 
         private bool PostExists(int id)

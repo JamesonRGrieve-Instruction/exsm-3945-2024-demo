@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DotNetAPIDemo.Models;
+using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace DotNetAPIDemo.Controllers
 {
@@ -22,6 +19,8 @@ namespace DotNetAPIDemo.Controllers
 
         // GET: api/User
         [HttpGet]
+        [SwaggerOperation(Summary = "Get all users")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Returns all users", typeof(IEnumerable<User>))]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
             return await _context.Users.ToListAsync();
@@ -29,9 +28,13 @@ namespace DotNetAPIDemo.Controllers
 
         // GET: api/User/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        [SwaggerOperation(Summary = "Get a specific user")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Returns the user", typeof(User))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "If the user does not exist")]
+
+        public async Task<ActionResult<User>> GetUser([SwaggerParameter("The id of the user to retrieve", Required = true)] int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            User user = await _context.Users.FindAsync(id);
 
             if (user == null)
             {
@@ -42,15 +45,25 @@ namespace DotNetAPIDemo.Controllers
         }
 
         // PUT: api/User/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
+        [SwaggerOperation(Summary = "Update a specific user")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Returns the updated user", typeof(User))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "If the id does not match the user's id")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "If the user does not exist")]
+
+        public async Task<IActionResult> PutUser([SwaggerParameter("The id of the user to update", Required = true)] int id, [FromBody] User user)
         {
-            if (id != user.Id)
+            if (user == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _context.Entry(user).CurrentValues.SetValues(user);
             _context.Entry(user).State = EntityState.Modified;
 
             try
@@ -69,12 +82,13 @@ namespace DotNetAPIDemo.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok(user);
         }
 
         // POST: api/User
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [SwaggerOperation(Summary = "Create a new user")]
+        [SwaggerResponse(StatusCodes.Status201Created, "Returns the created user", typeof(User))]
         public async Task<ActionResult<User>> PostUser(User user)
         {
             _context.Users.Add(user);
@@ -85,9 +99,13 @@ namespace DotNetAPIDemo.Controllers
 
         // DELETE: api/User/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        [SwaggerOperation(Summary = "Delete a specific user")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Returns the deleted user", typeof(User))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "If the user does not exist")]
+
+        public async Task<IActionResult> DeleteUser([SwaggerParameter("The id of the user to delete", Required = true)] int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            User user = await _context.Users.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
@@ -96,7 +114,22 @@ namespace DotNetAPIDemo.Controllers
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(user);
+        }
+
+        [HttpGet("{id}/Post")]
+        [SwaggerOperation(Summary = "Get all posts of a specific user")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Returns all posts of the user", typeof(IEnumerable<Post>))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "If the user does not exist")]
+
+        public async Task<ActionResult<IEnumerable<Post>>> GetPosts([SwaggerParameter("The id of the user to retrieve posts", Required = true)] int id)
+        {
+            if (!UserExists(id))
+            {
+                return NotFound();
+            }
+            IEnumerable<Post> posts = await _context.Posts.Where(p => p.UserID == id).ToListAsync();
+            return Ok(posts);
         }
 
         private bool UserExists(int id)
