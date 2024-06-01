@@ -2,9 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DotNetAPIDemo.Models;
 using Swashbuckle.AspNetCore.Annotations;
-using Microsoft.AspNetCore.JsonPatch;
 using System.Text.RegularExpressions;
-
+using DotNetAPIDemo.Data;
 namespace DotNetAPIDemo.Controllers
 {
     [Route("api/[controller]")]
@@ -86,27 +85,12 @@ namespace DotNetAPIDemo.Controllers
         [SwaggerResponse(StatusCodes.Status400BadRequest, "If the id does not match the post's id")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "If the post does not exist")]
 
-        public async Task<IActionResult> PutPost([SwaggerParameter("The id of the post", Required = true)] int id, [FromBody] JsonPatchDocument<Post> patchDoc)
+        public async Task<IActionResult> PutPost([SwaggerParameter("The id of the post", Required = true)] int id, [FromBody] Post post)
         {
-            if (patchDoc == null)
-            {
-                return BadRequest();
-            }
-
-            Post post = await _context.Posts.FindAsync(id);
-
-            if (post == null)
-            {
-                return NotFound();
-            }
-
-            patchDoc.ApplyTo(post, ModelState);
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
             _context.Entry(post).CurrentValues.SetValues(post);
             _context.Entry(post).State = EntityState.Modified;
 

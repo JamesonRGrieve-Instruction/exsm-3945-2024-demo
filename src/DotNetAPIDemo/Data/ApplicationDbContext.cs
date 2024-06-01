@@ -1,6 +1,7 @@
 using DotNetAPIDemo.Models;
 using Microsoft.EntityFrameworkCore;
 
+namespace DotNetAPIDemo.Data;
 public class ApplicationDbContext : DbContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)

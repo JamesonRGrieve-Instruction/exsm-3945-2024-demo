@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DotNetAPIDemo.Models;
 using Swashbuckle.AspNetCore.Annotations;
-using Microsoft.AspNetCore.JsonPatch;
+using DotNetAPIDemo.Data;
 
 namespace DotNetAPIDemo.Controllers
 {
@@ -51,13 +51,8 @@ namespace DotNetAPIDemo.Controllers
         [SwaggerResponse(StatusCodes.Status400BadRequest, "If the id does not match the user's id")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "If the user does not exist")]
 
-        public async Task<IActionResult> PutUser([SwaggerParameter("The id of the user to update", Required = true)] int id, [FromBody] User user)
+        public async Task<ActionResult<User>> PutUser([SwaggerParameter("The id of the user to update", Required = true)] int id, [FromBody] User user)
         {
-            if (user == null)
-            {
-                return NotFound();
-            }
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
