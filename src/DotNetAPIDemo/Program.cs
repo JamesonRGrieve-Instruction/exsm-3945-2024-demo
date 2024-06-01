@@ -10,6 +10,7 @@ builder.Services.AddSwaggerGen(config =>
     config.SwaggerDoc("v1", new() { Title = "EXSM3945 DotNET API Sample API", Version = "v1" });
     config.EnableAnnotations();
 });
+builder.Services.AddControllers();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion("10.4.28-MariaDB")));
@@ -21,7 +22,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseRouting();
+app.MapControllers();
 app.UseHttpsRedirection();
 
 
