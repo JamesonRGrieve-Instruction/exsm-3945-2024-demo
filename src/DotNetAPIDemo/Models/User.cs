@@ -10,11 +10,11 @@ public class User
     [Column("id")]
     public int ID { get; set; }
     [Required]
-    [Column("email", TypeName = "varchar(30)")]
+    [Column("email", TypeName = "varchar(255)")]
     [Display(Name = "E-Mail Address")]
     public string Email { get; set; } = "";
     [Required]
-    [Column("password", TypeName = "varchar(30)")]
+    [Column("password", TypeName = "varchar(255)")]
     [Display(Name = "Password")]
     public string Password { get; set; } = "";
     [Required]

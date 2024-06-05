@@ -1,6 +1,8 @@
 using DotNetAPIDemo.Models;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Security.Cryptography;
+using System.Text;
 [Route("api/user")]
 [ApiController]
 public class UserController : ControllerBase
@@ -35,8 +37,10 @@ public class UserController : ControllerBase
     {
         string AuthorizationDecoded = Base64ToText(Authorization.Replace("Basic ", ""));
         string EMail = AuthorizationDecoded.Split(':')[0];
-        string Password = AuthorizationDecoded.Split(':')[1];
-        _context.Users.Add(new User() { Email = EMail, Password = Password });
+        byte[] Password = Encoding.Unicode.GetBytes(AuthorizationDecoded.Split(':')[1]);
+        byte[] EncryptionSecret = Encoding.Unicode.GetBytes(Environment.GetEnvironmentVariable("ENCRYPTION_SECRET") ?? "");
+        byte[] HashedPassword = SHA256.HashData(EncryptionSecret.Concat(Password).ToArray());
+        _context.Users.Add(new User() { Email = EMail, Password = Convert.ToBase64String(HashedPassword) });
         _context.SaveChanges();
         return StatusCode(201, "User Registered");
     }
@@ -55,14 +59,23 @@ public class UserController : ControllerBase
     [SwaggerResponse(401, "Unauthorized", typeof(string))]
     [SwaggerResponse(500, "Internal Server Error", typeof(string))]
     public ActionResult<string> PostSample(
-        [FromBody][SwaggerParameter("Message to Send Back", Required = false)]/* FromBody represents the ENTIRE body, not just one parameter therein */ string body,
-        [FromQuery][SwaggerParameter("Status Code to Send Back", Required = false)] int responseCode = 200,
-        [FromRoute][SwaggerParameter("To Whom to Say Hello", Required = false)] string routeParam = "World",
-        [FromHeader][SwaggerParameter("Authorization Header", Required = false)] string Authorization = null
-    //[FromForm] string[] formParams = null,
-    //[FromServices] IServiceProvider serviceProvider = null
+        [FromHeader][SwaggerParameter("Authorization Header (Basic)", Required = true)] string Authorization
     )
     {
-        return Ok();
+        string AuthorizationDecoded = Base64ToText(Authorization.Replace("Basic ", ""));
+        string EMail = AuthorizationDecoded.Split(':')[0];
+        byte[] Password = Encoding.Unicode.GetBytes(AuthorizationDecoded.Split(':')[1]);
+        byte[] EncryptionSecret = Encoding.Unicode.GetBytes(Environment.GetEnvironmentVariable("ENCRYPTION_SECRET") ?? "");
+        string HashedPassword = Convert.ToBase64String(SHA256.HashData(EncryptionSecret.Concat(Password).ToArray()));
+        User user = _context.Users.Where(u => u.Email == EMail).FirstOrDefault();
+        if (user == null || user.Password != HashedPassword)
+        {
+            return StatusCode(401, "Unauthorized");
+        }
+        else
+        {
+            return StatusCode(200, "Authorized");
+        }
+
     }
 }
