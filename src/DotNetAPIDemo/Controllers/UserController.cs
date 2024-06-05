@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.IdentityModel.Tokens;
 [Route("api/user")]
 [ApiController]
 public class UserController : ControllerBase
@@ -13,16 +14,6 @@ public class UserController : ControllerBase
     {
         _context = context;
     }
-    private string Base64ToText(string base64)
-    {
-        return System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(base64));
-    }
-    private string TextToBase64(string text)
-    {
-        return Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(text));
-    }
-
-
     [HttpPost("register")]
     [SwaggerOperation(
         Summary = "Register a User",
@@ -35,7 +26,7 @@ public class UserController : ControllerBase
 
     public ActionResult<string> Register([FromHeader][SwaggerParameter("Authorization Header (Basic)", Required = true)] string Authorization)
     {
-        string AuthorizationDecoded = Base64ToText(Authorization.Replace("Basic ", ""));
+        string AuthorizationDecoded = Base64UrlEncoder.Decode(Authorization.Replace("Basic ", ""));
         string EMail = AuthorizationDecoded.Split(':')[0];
         byte[] Password = Encoding.Unicode.GetBytes(AuthorizationDecoded.Split(':')[1]);
         byte[] EncryptionSecret = Encoding.Unicode.GetBytes(Environment.GetEnvironmentVariable("ENCRYPTION_SECRET") ?? "");
@@ -62,19 +53,24 @@ public class UserController : ControllerBase
         [FromHeader][SwaggerParameter("Authorization Header (Basic)", Required = true)] string Authorization
     )
     {
-        string AuthorizationDecoded = Base64ToText(Authorization.Replace("Basic ", ""));
+        string AuthorizationDecoded = Base64UrlEncoder.Decode(Authorization.Replace("Basic ", ""));
         string EMail = AuthorizationDecoded.Split(':')[0];
         byte[] Password = Encoding.Unicode.GetBytes(AuthorizationDecoded.Split(':')[1]);
         byte[] EncryptionSecret = Encoding.Unicode.GetBytes(Environment.GetEnvironmentVariable("ENCRYPTION_SECRET") ?? "");
         string HashedPassword = Convert.ToBase64String(SHA256.HashData(EncryptionSecret.Concat(Password).ToArray()));
         User user = _context.Users.Where(u => u.Email == EMail).FirstOrDefault();
+
         if (user == null || user.Password != HashedPassword)
         {
             return StatusCode(401, "Unauthorized");
         }
         else
         {
-            return StatusCode(200, "Authorized");
+            string JWTHeader = Base64UrlEncoder.Encode("{\"alg\": \"HS256\",\"typ\": \"JWT\"}");
+            string JWTPayload = Base64UrlEncoder.Encode("{\"sub\": \"" + user.ID + "\", \"email\": \"" + user.Email + "\"}");
+            string JWTSignature = Base64UrlEncoder.Encode(SHA256.HashData(Encoding.UTF8.GetBytes(JWTHeader + "." + JWTPayload + "." + Environment.GetEnvironmentVariable("ENCRYPTION_SECRET") ?? "")).ToString());
+            string JWT = JWTHeader + "." + JWTPayload + "." + JWTSignature;
+            return StatusCode(200, JWT);
         }
 
     }
