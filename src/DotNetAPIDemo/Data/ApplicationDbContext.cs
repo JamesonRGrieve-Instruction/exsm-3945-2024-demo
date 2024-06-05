@@ -10,6 +10,7 @@ public class ApplicationDbContext : DbContext
 
     public virtual DbSet<Person> People { get; set; }
     public virtual DbSet<Job> Jobs { get; set; }
+    public virtual DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
