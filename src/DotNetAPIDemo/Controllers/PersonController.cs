@@ -21,7 +21,7 @@ public class PersonController : ControllerBase
         public string LastName { get; init; }
         public string PhoneNumber { get; init; }
         public int JobID { get; init; }
-        public string JobName { get; init; }
+        public string? JobName { get; init; }
         public string PubliclyVisible { get; init; } = "off";
     }
 
@@ -35,9 +35,14 @@ public class PersonController : ControllerBase
     [SwaggerResponse(201, "Success", typeof(Person))]
     [SwaggerResponse(400, "Bad Request", typeof(string))]
     public async Task<IActionResult> PostPerson(
-        [FromBodyAttribute][SwaggerParameter("Person to Create", Required = true)] PersonCreate personCreate
+        [FromBodyAttribute][SwaggerParameter("Person to Create", Required = true)] PersonCreate personCreate,
+        [FromHeader][SwaggerParameter("Authorization Header (Bearer)", Required = true)] string Authorization
     )
     {
+        if (Authorization == null || !UserController.VerifyJWT(Authorization))
+        {
+            return Unauthorized();
+        }
         Person newPerson = new Person()
         {
             FirstName = personCreate.FirstName,

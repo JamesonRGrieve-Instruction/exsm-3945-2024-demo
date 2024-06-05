@@ -74,4 +74,14 @@ public class UserController : ControllerBase
         }
 
     }
+
+    public static bool VerifyJWT(string JWT)
+    {
+        string[] JWTParts = JWT.Replace("Bearer ", "").Split('.');
+        string JWTHeader = JWTParts[0];
+        string JWTPayload = JWTParts[1];
+        string JWTSignature = JWTParts[2];
+        string JWTSignatureCheck = Base64UrlEncoder.Encode(SHA256.HashData(Encoding.UTF8.GetBytes(JWTHeader + "." + JWTPayload + "." + Environment.GetEnvironmentVariable("ENCRYPTION_SECRET") ?? "")).ToString());
+        return JWTSignature == JWTSignatureCheck;
+    }
 }
