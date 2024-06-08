@@ -10,6 +10,7 @@ namespace DotNetAPIDemo.Models
     {
         [Key]
         [Column("vin")]
+        [RegularExpression(@"^[A-HJ-NPR-Z0-9]{17}$", ErrorMessage = "Invalid VIN")]
         public string VIN { get; set; }
 
         [Required]
@@ -29,12 +30,13 @@ namespace DotNetAPIDemo.Models
         public int ModelYear { get; set; }
 
         [Column("colour")]
+        [StringLength(50, MinimumLength = 3)]
         public string Colour { get; set; }
 
         [Column("purchase_date")]
         public DateTime PurchaseDate { get; set; }
 
         [Column("sale_date")]
-        public DateTime SaleDate { get; set; }
+        public DateTime? SaleDate { get; set; }
     }
 }

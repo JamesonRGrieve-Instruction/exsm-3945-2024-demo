@@ -78,6 +78,18 @@ namespace DotNetAPIDemo.Controllers
         [HttpPost]
         public async Task<ActionResult<Vehicle>> PostVehicle(Vehicle vehicle)
         {
+            if (vehicle.ModelYear < 1900 || vehicle.ModelYear > DateTime.Now.Year + 1)
+            {
+                return BadRequest("Invalid model year - must be between 1900 and the current year plus one.");
+            }
+            if (vehicle.PurchaseDate > DateTime.Now)
+            {
+                return BadRequest("Invalid purchase date - must be in the past.");
+            }
+            if (vehicle.SaleDate != null && vehicle.SaleDate < vehicle.PurchaseDate)
+            {
+                return BadRequest("Invalid sale date - must be after the purchase date.");
+            }
             _context.Vehicles.Add(vehicle);
             try
             {
