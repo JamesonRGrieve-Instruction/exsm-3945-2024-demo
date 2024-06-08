@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetAPIDemo.Tests.FrontEn
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetAPIDemo.Tests.BackEnd", "DotNetAPIDemo.Tests\BackEnd\DotNetAPIDemo.Tests.BackEnd.csproj", "{B4706E68-F7F9-496C-ADDF-F6FE605DECE7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetAPIDemo", "DotNetAPIDemo\DotNetAPIDemo.csproj", "{C867DCD9-F628-4652-BEFC-01D2CDB05578}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +28,10 @@ Global
 		{B4706E68-F7F9-496C-ADDF-F6FE605DECE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B4706E68-F7F9-496C-ADDF-F6FE605DECE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4706E68-F7F9-496C-ADDF-F6FE605DECE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C867DCD9-F628-4652-BEFC-01D2CDB05578}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C867DCD9-F628-4652-BEFC-01D2CDB05578}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C867DCD9-F628-4652-BEFC-01D2CDB05578}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C867DCD9-F628-4652-BEFC-01D2CDB05578}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C975315E-E049-4AF3-AB77-F1AE5A2DE694} = {B775492B-7639-4B7A-8DF0-E6AD1A63DF07}
