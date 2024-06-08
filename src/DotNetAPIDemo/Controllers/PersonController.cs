@@ -27,7 +27,7 @@ public class PersonController : ControllerBase
     }
 
     [HttpPost("person")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [SwaggerOperation(
         Summary = "Create a Person",
         Description = "Create a person in the database.",
