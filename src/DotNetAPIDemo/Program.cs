@@ -26,6 +26,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseRouting();
+app.UseAuthorization(); // This is missing in MS' documentation, if following along with that.
 app.MapControllers();
 app.MapIdentityApi<IdentityUser>();
 app.UseHttpsRedirection();

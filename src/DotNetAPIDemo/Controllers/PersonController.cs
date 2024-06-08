@@ -4,6 +4,7 @@ using DotNetAPIDemo.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authorization;
 [Route("api")]
 [ApiController]
 public class PersonController : ControllerBase
@@ -26,6 +27,7 @@ public class PersonController : ControllerBase
     }
 
     [HttpPost("person")]
+    [Authorize]
     [SwaggerOperation(
         Summary = "Create a Person",
         Description = "Create a person in the database.",
