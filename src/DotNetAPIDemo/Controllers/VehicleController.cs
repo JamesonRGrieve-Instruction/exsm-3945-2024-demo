@@ -30,7 +30,7 @@ namespace DotNetAPIDemo.Controllers
 
         // GET: api/Vehicle/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Vehicle>> GetVehicle(int id)
+        public async Task<ActionResult<Vehicle>> GetVehicle(string id)
         {
             var vehicle = await _context.Vehicles.FindAsync(id);
 
@@ -45,9 +45,9 @@ namespace DotNetAPIDemo.Controllers
         // PUT: api/Vehicle/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutVehicle(int id, Vehicle vehicle)
+        public async Task<IActionResult> PutVehicle(string id, Vehicle vehicle)
         {
-            if (id != vehicle.ID)
+            if (id != vehicle.VIN)
             {
                 return BadRequest();
             }
@@ -79,14 +79,28 @@ namespace DotNetAPIDemo.Controllers
         public async Task<ActionResult<Vehicle>> PostVehicle(Vehicle vehicle)
         {
             _context.Vehicles.Add(vehicle);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                if (VehicleExists(vehicle.VIN))
+                {
+                    return Conflict();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
-            return CreatedAtAction("GetVehicle", new { id = vehicle.ID }, vehicle);
+            return CreatedAtAction("GetVehicle", new { id = vehicle.VIN }, vehicle);
         }
 
         // DELETE: api/Vehicle/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteVehicle(int id)
+        public async Task<IActionResult> DeleteVehicle(string id)
         {
             var vehicle = await _context.Vehicles.FindAsync(id);
             if (vehicle == null)
@@ -100,9 +114,9 @@ namespace DotNetAPIDemo.Controllers
             return NoContent();
         }
 
-        private bool VehicleExists(int id)
+        private bool VehicleExists(string id)
         {
-            return _context.Vehicles.Any(e => e.ID == id);
+            return _context.Vehicles.Any(e => e.VIN == id);
         }
     }
 }

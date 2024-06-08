@@ -55,8 +55,8 @@ namespace DotNetAPIDemo.Migrations
                 name: "vehicle",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    vin = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     user_email = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     model_id = table.Column<int>(type: "int", nullable: false),
@@ -68,7 +68,7 @@ namespace DotNetAPIDemo.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_vehicle", x => x.id);
+                    table.PrimaryKey("PK_vehicle", x => x.vin);
                     table.ForeignKey(
                         name: "fk_vehicle_model",
                         column: x => x.model_id,

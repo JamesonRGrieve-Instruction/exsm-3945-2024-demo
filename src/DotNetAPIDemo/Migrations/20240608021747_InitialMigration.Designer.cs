@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DotNetAPIDemo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240608021409_InitialMigration")]
+    [Migration("20240608021747_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -71,12 +71,9 @@ namespace DotNetAPIDemo.Migrations
 
             modelBuilder.Entity("DotNetAPIDemo.Models.Vehicle", b =>
                 {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("ID"));
+                    b.Property<string>("VIN")
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("vin");
 
                     b.Property<string>("Colour")
                         .IsRequired()
@@ -104,7 +101,7 @@ namespace DotNetAPIDemo.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("user_email");
 
-                    b.HasKey("ID");
+                    b.HasKey("VIN");
 
                     b.HasIndex("ModelID");
 

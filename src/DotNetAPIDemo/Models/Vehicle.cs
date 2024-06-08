@@ -9,9 +9,8 @@ namespace DotNetAPIDemo.Models
     public class Vehicle
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("id")]
-        public int ID { get; set; }
+        [Column("vin")]
+        public string VIN { get; set; }
 
         [Required]
         [Column("user_email")]
