@@ -15,6 +15,7 @@ namespace DotNetAPIDemo.Models
 
         [Required]
         [Column("name")]
+        [StringLength(50, MinimumLength = 3)]
         public string Name { get; set; }
 
         [JsonIgnore]
