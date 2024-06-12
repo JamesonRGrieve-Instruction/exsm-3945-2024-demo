@@ -25,10 +25,8 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public ActionResult<string> Register([FromForm] string email, [FromForm] string password)
-    {
-        return Register("Basic " + Base64UrlEncoder.Encode(email + ":" + password));
-    }
+    public ActionResult<string> Register([FromForm] string email, [FromForm] string password) => Register("Basic " + Base64UrlEncoder.Encode(email + ":" + password));
+
 
 
     [HttpPost("/api/register")]
