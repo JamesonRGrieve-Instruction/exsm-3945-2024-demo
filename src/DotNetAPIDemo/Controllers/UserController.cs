@@ -4,9 +4,8 @@ using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-[Route("api/user")]
-[ApiController]
-public class UserController : ControllerBase
+
+public class UserController : Controller
 {
     private readonly ApplicationDbContext _context;
 
@@ -14,7 +13,25 @@ public class UserController : ControllerBase
     {
         _context = context;
     }
-    [HttpPost("register")]
+
+    [HttpGet()]
+    [SwaggerOperation(
+        Summary = "Register a User",
+        Description = "Register a user.")
+    ]
+    public ActionResult Register()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public ActionResult<string> Register([FromForm] string email, [FromForm] string password)
+    {
+        return Register("Basic " + Base64UrlEncoder.Encode(email + ":" + password));
+    }
+
+
+    [HttpPost("/api/register")]
     [SwaggerOperation(
         Summary = "Register a User",
         Description = "Register a new application user.",
@@ -36,8 +53,27 @@ public class UserController : ControllerBase
         return StatusCode(201, "User Registered");
     }
 
+    [HttpGet()]
+    [SwaggerOperation(
+        Summary = "Login a User",
+        Description = "Provide a username and password and get a JWT.")
+    ]
+    public ActionResult Login()
+    {
+        return View();
+    }
 
-    [HttpPost("authorize")] // Route parameters are defined in the route itself
+    [HttpPost]
+    [SwaggerOperation(
+        Summary = "Login a User From Form",
+        Description = "Provide a username and password and get a JWT.")
+    ]
+    public ActionResult<string> Login([FromForm] string email, [FromForm] string password)
+    {
+        return Authorize("Basic " + Base64UrlEncoder.Encode(email + ":" + password));
+    }
+
+    [HttpPost] // Route parameters are defined in the route itself
     [SwaggerOperation(
         Summary = "Authorize a User",
         Description = "Provide a username and password and get a JWT.",
@@ -49,7 +85,7 @@ public class UserController : ControllerBase
     [SwaggerResponse(400, "Bad Request", typeof(string))]
     [SwaggerResponse(401, "Unauthorized", typeof(string))]
     [SwaggerResponse(500, "Internal Server Error", typeof(string))]
-    public ActionResult<string> PostSample(
+    public ActionResult<string> Authorize(
         [FromHeader][SwaggerParameter("Authorization Header (Basic)", Required = true)] string Authorization
     )
     {

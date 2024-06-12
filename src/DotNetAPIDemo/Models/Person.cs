@@ -58,10 +58,10 @@ public class Person
     public virtual Job Job { get; set; }
 
     [Column("user_id")]
-    public string? UserID { get; set; }
+    public int? UserID { get; set; }
 
     [ForeignKey(nameof(UserID))]
     [ValidateNever]
     [JsonIgnore]
-    public virtual IdentityUser User { get; set; }
+    public virtual User User { get; set; }
 }
