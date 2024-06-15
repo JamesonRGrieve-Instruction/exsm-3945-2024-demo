@@ -23,6 +23,7 @@ namespace DotNetAPIDemo.Controllers
 
         // GET: api/Manufacturer
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<Manufacturer>>> GetManufacturers()
         {
             return await _context.Manufacturers.ToListAsync();
@@ -30,6 +31,7 @@ namespace DotNetAPIDemo.Controllers
 
         // GET: api/Manufacturer/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<Manufacturer>> GetManufacturer(int id)
         {
             var manufacturer = await _context.Manufacturers.FindAsync(id);
@@ -45,6 +47,7 @@ namespace DotNetAPIDemo.Controllers
         // PUT: api/Manufacturer/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> PutManufacturer(int id, Manufacturer manufacturer)
         {
             if (id != manufacturer.ID)
@@ -87,6 +90,7 @@ namespace DotNetAPIDemo.Controllers
 
         // DELETE: api/Manufacturer/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteManufacturer(int id)
         {
             var manufacturer = await _context.Manufacturers.FindAsync(id);

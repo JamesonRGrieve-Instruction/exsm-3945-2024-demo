@@ -7,11 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DotNetAPIDemo.Data;
 using DotNetAPIDemo.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace DotNetAPIDemo.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ModelController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
