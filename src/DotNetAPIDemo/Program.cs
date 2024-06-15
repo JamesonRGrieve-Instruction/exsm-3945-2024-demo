@@ -1,6 +1,6 @@
 using DotNetAPIDemo.Data;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.AspNetCore.Identity;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -11,7 +11,8 @@ builder.Services.AddSwaggerGen(config =>
     config.SwaggerDoc("v1", new() { Title = "EXSM3945 DotNET API Sample API", Version = "v1" });
     config.EnableAnnotations();
 });
-
+builder.Services.AddAuthorization();
+builder.Services.AddIdentityApiEndpoints<IdentityUser>().AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllers();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -24,10 +25,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseRouting();
+app.UseAuthorization();
 app.MapControllers();
 app.UseHttpsRedirection();
-
+app.MapIdentityApi<IdentityUser>();
 
 app.Run();
 

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DotNetAPIDemo.Data;
 using DotNetAPIDemo.Models;
-
+using Microsoft.AspNetCore.Authorization;
 namespace DotNetAPIDemo.Controllers
 {
     [Route("api/[controller]")]
@@ -76,6 +76,7 @@ namespace DotNetAPIDemo.Controllers
         // POST: api/Manufacturer
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<Manufacturer>> PostManufacturer(Manufacturer manufacturer)
         {
             _context.Manufacturers.Add(manufacturer);
